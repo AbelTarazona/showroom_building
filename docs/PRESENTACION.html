@@ -1,0 +1,459 @@
+<title>Showroom 3D que califica leads</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --ground: #0B1220;
+    --surface: #131C2E;
+    --surface-2: #1B2740;
+    --line: #26344F;
+    --ink: #EEF2F8;
+    --muted: #8D9AB3;
+    --amber: #F5B841;
+    --amber-deep: #C98A12;
+    --green: #34D399;
+    --rose: #F87171;
+    --display: "Bricolage Grotesque", "Arial Black", Impact, sans-serif;
+    --body: "Instrument Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .deck { position: fixed; inset: 0; display: grid; place-items: center; }
+  .deck::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(141,154,179,.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(141,154,179,.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at 50% 40%, #000 30%, transparent 80%);
+    pointer-events: none;
+  }
+  .stage {
+    position: relative;
+    width: 1280px; height: 720px;
+    transform-origin: center center;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    padding: 72px 96px 88px;
+    box-sizing: border-box;
+    opacity: 0; visibility: hidden;
+    transition: opacity .45s ease, visibility 0s linear .45s;
+  }
+  .slide.active { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .slide.active .rise { animation: rise .6s cubic-bezier(.2,.7,.2,1) both; }
+  .slide.active .rise:nth-child(2) { animation-delay: .08s }
+  .slide.active .rise:nth-child(3) { animation-delay: .16s }
+  .slide.active .rise:nth-child(4) { animation-delay: .24s }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: none }
+    .slide.active .rise { animation: none }
+  }
+
+  /* --- tipografía --- */
+  .eyebrow {
+    font-family: var(--mono); font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--amber); display: flex; align-items: center; gap: 12px; margin: 0 0 22px;
+  }
+  .eyebrow::after { content: ""; flex: 0 0 48px; height: 1px; background: var(--amber); opacity: .6 }
+  h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -.02em; line-height: 1.02; }
+  h1 { font-size: 72px; font-weight: 800; }
+  h2 { font-size: 54px; font-weight: 700; }
+  h3 { font-family: var(--display); font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: -.01em }
+  p { font-size: 22px; line-height: 1.45; margin: 0; max-width: 34em; color: var(--ink) }
+  p.lead { font-size: 26px; color: var(--muted); max-width: 26em }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums }
+  .amber { color: var(--amber) } .green { color: var(--green) } .muted { color: var(--muted) }
+
+  /* --- layouts --- */
+  .cols { display: grid; gap: 40px; }
+  .cols-2 { grid-template-columns: 1fr 1fr }
+  .cols-3 { grid-template-columns: repeat(3, 1fr) }
+  .cols-5 { grid-template-columns: repeat(5, 1fr); gap: 20px }
+  .stack { display: flex; flex-direction: column; gap: 18px }
+
+  .tile {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 20px 22px;
+  }
+  .tile p { font-size: 17px; line-height: 1.4; color: var(--muted) }
+  .tile.hot { border-color: var(--amber); background: linear-gradient(180deg, rgba(245,184,65,.10), rgba(245,184,65,.02)); }
+
+  .kpi { display: flex; flex-direction: column; gap: 6px }
+  .kpi .n { font-family: var(--display); font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums }
+  .kpi .l { font-size: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-family: var(--mono) }
+
+  .steps { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; counter-reset: paso }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 16px; min-height: 150px; display: flex; flex-direction: column; gap: 10px; position: relative }
+  .step::before { counter-increment: paso; content: counter(paso, decimal-leading-zero); font-family: var(--mono); font-size: 12px; color: var(--amber); letter-spacing: .1em }
+  .step .ico { font-size: 28px; line-height: 1 }
+  .step b { font-family: var(--display); font-size: 18px; font-weight: 700; line-height: 1.15 }
+  .step span { font-size: 14px; color: var(--muted); line-height: 1.35 }
+  .step.hot { border-color: var(--amber) }
+
+  table { border-collapse: collapse; width: 100%; font-size: 18px }
+  th { text-align: left; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 0 12px 10px; border-bottom: 1px solid var(--line); font-weight: 400 }
+  td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top }
+  td.num { font-family: var(--mono); text-align: right; color: var(--amber); font-variant-numeric: tabular-nums; white-space: nowrap }
+
+  .pill { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted) }
+  .pill.on { border-color: var(--green); color: var(--green) }
+  .pill.amber { border-color: var(--amber); color: var(--amber) }
+
+  .quote { font-family: var(--display); font-size: 44px; font-weight: 700; line-height: 1.15; letter-spacing: -.02em; text-wrap: balance; max-width: 20em }
+  .quote em { font-style: normal; color: var(--amber) }
+
+  .check { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; font-size: 21px }
+  .check li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; line-height: 1.35 }
+  .check li::before { content: "✓"; color: var(--green); font-family: var(--mono); font-weight: 600 }
+  .check li small { display: block; color: var(--muted); font-size: 16px }
+
+  /* --- portada --- */
+  .cover { display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 48px; height: 100%; box-sizing: border-box }
+  .cover .tag { font-family: var(--mono); font-size: 13px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: 24px; display: flex; gap: 22px; flex-wrap: wrap }
+  .cover .tag b { color: var(--ink); font-weight: 600 }
+  .hint { position: absolute; left: 96px; bottom: 32px; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .06em }
+  .hint kbd { border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink) }
+
+  /* --- ficha de unidad (portada y demo) --- */
+  .ficha { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 22px 24px; width: 380px; box-shadow: 0 30px 80px rgba(0,0,0,.45) }
+  .ficha .id { font-family: var(--mono); font-size: 13px; color: var(--muted); letter-spacing: .1em; display: flex; justify-content: space-between; align-items: center }
+  .ficha .name { font-family: var(--display); font-size: 28px; font-weight: 700; margin: 8px 0 2px; letter-spacing: -.01em }
+  .ficha .spec { color: var(--muted); font-size: 15px }
+  .ficha .price { font-family: var(--display); font-size: 40px; font-weight: 800; margin-top: 14px; letter-spacing: -.02em; font-variant-numeric: tabular-nums }
+  .ficha .cuota { font-size: 15px; color: var(--muted) } .ficha .cuota b { color: var(--green); font-family: var(--mono); font-weight: 600 }
+  .ficha .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px }
+  .ficha .btns span { font-size: 13px; text-align: center; padding: 9px 6px; border-radius: 6px; border: 1px solid var(--line); color: var(--ink) }
+  .ficha .btns span.p { background: var(--amber); color: #1a1200; border-color: var(--amber); font-weight: 600 }
+
+  /* --- navegación tipo edificio --- */
+  .nav { position: fixed; right: 26px; bottom: 22px; display: flex; align-items: flex-end; gap: 14px; z-index: 5 }
+  .nav svg { display: block; cursor: pointer }
+  .nav .counter { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .1em; text-align: right; line-height: 1.6 }
+  .nav .counter b { color: var(--amber); font-weight: 600 }
+  .footer { position: fixed; left: 26px; bottom: 22px; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; z-index: 5 }
+  .notes { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(11,18,32,.96); border-top: 1px solid var(--amber); padding: 18px 40px 22px; font-size: 17px; line-height: 1.5; color: var(--ink); z-index: 9; max-height: 32vh; overflow: auto }
+  .notes[hidden] { display: none }
+  .notes .t { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--amber); text-transform: uppercase; margin-bottom: 6px }
+  .zone { position: fixed; top: 0; bottom: 120px; width: 22vw; z-index: 4; cursor: pointer }
+  .zone.l { left: 0 } .zone.r { right: 0 }
+  :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px }
+</style>
+
+<div class="deck" id="deck">
+  <div class="stage" id="stage">
+
+    <!-- P01 Portada -->
+    <section class="slide" data-notes="Saludo de 5 segundos. Nombre del equipo. Frase: hoy una familia de Carabayllo compra en planos mirando un PDF; nosotros le damos el edificio en la mano y a la constructora le decimos a quién llamar primero.">
+      <div class="cover">
+        <div>
+          <p class="eyebrow rise">Hackathon Innova Vivienda · Reto 1 Comercial</p>
+          <h1 class="rise">El edificio que <span class="amber">vende</span> y el motor que <span class="amber">califica</span>.</h1>
+          <p class="lead rise" style="margin-top:26px">Showroom 3D para venta en planos de vivienda social. La familia explora, simula y separa. La constructora recibe leads con puntaje y sabe a quién llamar primero.</p>
+          <div class="tag rise"><span>UTEC · <b>10 sep 2026</b></span><span>Proyecto demo · <b>Los Jardines de Carabayllo</b></span><span>96 unidades · 12 pisos</span></div>
+        </div>
+        <div class="ficha rise" aria-label="Ficha de la unidad P07-N2">
+          <div class="id"><span>P07-N2 · PISO 7 · NORTE</span><span class="pill on">Disponible</span></div>
+          <div class="name">3 dormitorios · 68 m²</div>
+          <div class="spec">Tipología B · vista al parque · entrega 2027-12</div>
+          <div class="price mono">S/ 209,400</div>
+          <div class="cuota">desde <b>S/ 1,822</b> al mes · 20 años · bono referencial aplicado</div>
+          <div class="btns"><span>🚪 Ver interior</span><span>🪟 Ver la vista</span><span>💰 Simular cuota</span><span class="p">Separar este depa</span></div>
+        </div>
+      </div>
+      <div class="hint"><kbd>→</kbd> avanzar · <kbd>F</kbd> pantalla completa · <kbd>N</kbd> notas del presentador</div>
+    </section>
+
+    <!-- P02 Problema -->
+    <section class="slide" data-notes="Dos dolores, uno por lado del mostrador. No inventar cifras: hablar de lo que vimos en las visitas y en los brochures. El jurado son constructoras: el dolor del asesor es el que les duele a ellos.">
+      <p class="eyebrow rise">El problema</p>
+      <h2 class="rise">Se vende en planos con un PDF. Se persigue leads con un Excel.</h2>
+      <div class="cols cols-2 rise" style="margin-top:44px">
+        <div class="tile">
+          <h3>La familia compradora</h3>
+          <p>Decide la compra más grande de su vida sin ver el departamento. No sabe cuánto pagaría al mes ni si califica a Techo Propio o Mivivienda hasta que un asesor la llama días después.</p>
+        </div>
+        <div class="tile">
+          <h3>El asesor de la constructora</h3>
+          <p>Recibe cientos de contactos iguales: nombre y teléfono. Llama a todos por orden de llegada. El que estaba listo para separar se enfría; el que solo curioseaba ocupa la tarde.</p>
+        </div>
+      </div>
+      <p class="lead rise" style="margin-top:40px">El interés existe. Lo que falta es <span class="amber">un lugar donde se manifieste</span> y un sistema que lo lea.</p>
+    </section>
+
+    <!-- P03 Tesis -->
+    <section class="slide" data-notes="La frase central del pitch. Repetirla al cierre. Aquí no hay demo todavía: es el concepto en una línea.">
+      <p class="eyebrow rise">La idea</p>
+      <div class="quote rise">El 3D es el <em>sensor</em>. Cada toque de la familia sobre el edificio es una señal de intención que <em>puntúa</em> al lead y le dice al asesor <em>qué hacer después</em>.</div>
+      <div class="cols cols-3 rise" style="margin-top:56px">
+        <div class="tile"><h3>Explora</h3><p>Gira el edificio, filtra por dormitorios, entra al depa y se asoma por la ventana.</p></div>
+        <div class="tile"><h3>Se califica</h3><p>Simula la cuota, se precalifica al bono, deja sus datos con consentimiento y separa.</p></div>
+        <div class="tile hot"><h3>La constructora actúa</h3><p>Lead con score explicado, resumen de IA, seguimiento automático y cita con el asesor.</p></div>
+      </div>
+    </section>
+
+    <!-- P04 Recorrido -->
+    <section class="slide" data-notes="Este es el mapa de la demo. Cada caja es una pantalla real. Ir rápido: la demo en vivo lo muestra.">
+      <p class="eyebrow rise">El recorrido de la familia · en el celular</p>
+      <h2 class="rise">Siete toques entre la curiosidad y la separación</h2>
+      <div class="steps rise" style="margin-top:40px">
+        <div class="step"><span class="ico">🏢</span><b>Gira el edificio</b><span>96 unidades coloreadas por estado, tipología o precio</span></div>
+        <div class="step"><span class="ico">🎯</span><b>Filtra y elige</b><span>3 dorm · piso 7 · vista al parque. La cámara vuela a P07-N2</span></div>
+        <div class="step"><span class="ico">🚪</span><b>Entra al depa</b><span>Recorrido en primera persona: sala, cocina, dormitorios</span></div>
+        <div class="step"><span class="ico">🪟</span><b>Mira por la ventana</b><span>La vista real de esa orientación y ese piso</span></div>
+        <div class="step"><span class="ico">💰</span><b>Simula su cuota</b><span>Ingreso, ahorro, plazo. Bono referencial aplicado al instante</span></div>
+        <div class="step"><span class="ico">✅</span><b>¿Califico al bono?</b><span>Techo Propio o Mivivienda, con motivos claros</span></div>
+        <div class="step hot"><span class="ico">🔒</span><b>Separa y agenda</b><span>Deja sus datos, separa el depa, cita en caseta el sábado</span></div>
+      </div>
+      <p class="lead rise" style="margin-top:34px">Cada paso registra un evento. Ninguno pide datos antes de tiempo: la familia decide cuándo dejar su teléfono.</p>
+    </section>
+
+    <!-- P05 Score -->
+    <section class="slide" data-notes="Las reglas están en un JSON. La constructora las cambia sin programar. Subrayar 'explicado': el asesor ve por qué el lead tiene 75 puntos, no una caja negra.">
+      <p class="eyebrow rise">El motor de calificación</p>
+      <h2 class="rise">Un score explicado, de 0 a 100, que se arma con lo que la familia hizo</h2>
+      <div class="cols cols-2 rise" style="margin-top:36px; align-items:start">
+        <table>
+          <thead><tr><th>Señal de intención</th><th style="text-align:right">Puntos</th></tr></thead>
+          <tbody>
+            <tr><td>Precalificación alta al bono</td><td class="num">+30</td></tr>
+            <tr><td>Simuló su cuota y le alcanza</td><td class="num">+15</td></tr>
+            <tr><td>Inició la separación</td><td class="num">+15</td></tr>
+            <tr><td>Volvió a entrar otro día</td><td class="num">+10</td></tr>
+            <tr><td>Agendó una visita</td><td class="num">+10</td></tr>
+            <tr><td>Vio el interior · miró la vista · guardó favorito</td><td class="num">+5 c/u</td></tr>
+          </tbody>
+        </table>
+        <div class="stack">
+          <div class="tile hot">
+            <div class="id mono muted" style="font-size:13px;letter-spacing:.1em">LEAD · LUCÍA PAREDES · LOS OLIVOS</div>
+            <div class="kpi" style="margin-top:8px"><span class="n amber">90</span><span class="l">de 100 · etapa separado</span></div>
+            <p style="margin-top:10px">+30 precalificación alta · +15 simuló y le alcanza · +15 inició separación · +10 revisita · +5 interior · +5 vista · +5 favorito · +5 teléfono válido</p>
+          </div>
+          <div class="tile"><h3>Siguiente acción sugerida</h3><p>"Llamar hoy antes de las 6 p. m. Confirmar cita del sábado y enviar la ficha de P03-N2 por WhatsApp." Generada por IA con fallback por plantilla.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- P06 Panel -->
+    <section class="slide" data-notes="La pantalla de la constructora. Realtime: cuando la familia separa, aquí se pinta ámbar en el mismo segundo. Ese es el momento wow de la demo.">
+      <p class="eyebrow rise">El panel de la constructora · en el escritorio</p>
+      <h2 class="rise">Lo que ve el equipo comercial, en vivo</h2>
+      <div class="cols cols-3 rise" style="margin-top:36px">
+        <div class="tile"><h3>Leads con score</h3><p>Ordenados por puntaje, con etapa, unidad de interés, precalificación y última actividad. Aparecen en el momento en que la familia deja sus datos.</p></div>
+        <div class="tile"><h3>Mapa de calor 3D</h3><p>El mismo edificio coloreado por vistas, favoritos o leads. "Los pisos 6 a 9 con vista al parque concentran el interés; el sur alto casi no se mira."</p></div>
+        <div class="tile"><h3>Seguimiento automático</h3><p>Mensajes de WhatsApp programados a +5 min, +24 h y +72 h, personalizados con unidad, cuota y bono. Un clic y salen.</p></div>
+        <div class="tile"><h3>Citas y agenda</h3><p>Visitas a caseta y llamadas agendadas desde el celular de la familia, listadas por día para el asesor.</p></div>
+        <div class="tile"><h3>Inventario</h3><p>Estados por unidad, cambio manual, importación de precios por CSV. Lo que cambia aquí se repinta en todos los visores abiertos.</p></div>
+        <div class="tile"><h3>Consultas y postventa</h3><p>Chat de preguntas frecuentes con IA y registro de incidencias por unidad para después de la entrega.</p></div>
+      </div>
+    </section>
+
+    <!-- P07 Cobertura del reto -->
+    <section class="slide" data-notes="Mapear uno a uno contra lo que pidió el reto. El jurado tiene la lista: que la vea tachada.">
+      <p class="eyebrow rise">Lo que pide el Reto 1</p>
+      <h2 class="rise">Los cinco componentes del reto, cubiertos en un solo flujo</h2>
+      <div class="cols cols-2 rise" style="margin-top:40px; align-items:start">
+        <ul class="check">
+          <li><span>Seguimiento automático de leads<small>Secuencia de mensajes generada al capturar el lead o al abandonar una separación</small></span></li>
+          <li><span>Priorización con IA<small>Score explicable por reglas y resumen con siguiente acción por lead</small></span></li>
+          <li><span>Agendamiento de visitas<small>Desde el visor, sin llamada previa; cae en la agenda del asesor</small></span></li>
+        </ul>
+        <ul class="check">
+          <li><span>Comunicación centralizada<small>Timeline de eventos, mensajes y citas de cada familia en una sola vista</small></span></li>
+          <li><span>Atención de consultas<small>Chat con contexto del proyecto y de la unidad; deriva al asesor cuando corresponde</small></span></li>
+          <li><span>Y algo más: la familia ve su depa antes de que exista<small>Interior, vista desde la ventana y separación en el mismo lugar</small></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- P08 Demo en vivo -->
+    <section class="slide" data-notes="Cambiar a las dos ventanas. Izquierda celular, derecha panel. Unidad P07-N2 (alternativas P08-N2, P09-N2). Datos ficticios: Familia Quispe, 999 000 111. Tres minutos.">
+      <div class="cover">
+        <div>
+          <p class="eyebrow rise">Demo en vivo · 3 minutos</p>
+          <h1 class="rise">Una familia y un asesor, <span class="amber">al mismo tiempo</span>.</h1>
+          <p class="lead rise" style="margin-top:24px">A la izquierda el celular de la familia. A la derecha el panel de la constructora. Lo que pasa en uno se ve en el otro en el mismo segundo.</p>
+          <div class="tag rise"><span>Ingreso <b>S/ 3,800</b></span><span>Ahorro <b>S/ 15,000</b></span><span>Cuota <b>S/ 1,822</b> al mes</span><span>Cita <b>sábado · caseta</b></span></div>
+        </div>
+        <div class="ficha rise">
+          <div class="id"><span>P07-N2 · PISO 7 · NORTE</span><span class="pill amber">Separado</span></div>
+          <div class="name">3 dormitorios · 68 m²</div>
+          <div class="spec">Separado por Familia Quispe · hace un momento</div>
+          <div class="price mono">S/ 209,400</div>
+          <div class="cuota">lead <b>75</b> puntos · etapa separado · 3 seguimientos programados</div>
+          <div class="btns"><span>📞 Llamar</span><span>💬 WhatsApp</span><span>📅 Agendar</span><span class="p">Generar resumen IA</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- P09 Tecnología -->
+    <section class="slide" data-notes="Corto. Lo importante: corre sin internet, el edificio se genera desde datos, la IA tiene respaldo. Nada depende de un servicio externo para que la demo funcione.">
+      <p class="eyebrow rise">Cómo está hecho</p>
+      <h2 class="rise">Ligero de montar, difícil de que falle en el escenario</h2>
+      <div class="cols cols-2 rise" style="margin-top:36px; align-items:start">
+        <table>
+          <tbody>
+            <tr><td class="muted">3D</td><td>three.js con React. Edificio, interiores y vistas generados desde datos, sin modelos descargados</td></tr>
+            <tr><td class="muted">Datos</td><td>Postgres con Supabase en Docker local y Realtime para repintar el edificio en todos los visores</td></tr>
+            <tr><td class="muted">IA</td><td>OpenAI gpt-5-mini para resumen, siguiente acción, mensajes y chat. Si no hay red, plantillas deterministas</td></tr>
+            <tr><td class="muted">Reglas</td><td>Programas de bono, score y secuencia de seguimiento en un JSON que la constructora edita</td></tr>
+            <tr><td class="muted">Móvil</td><td>Web responsiva: cámara y ficha adaptadas a pantalla vertical, sin instalar nada</td></tr>
+          </tbody>
+        </table>
+        <div class="stack">
+          <div class="tile"><h3>Otro edificio en días</h3><p>Pisos, tipologías, precios y orientaciones salen de un generador. Un modelo GLB real de la constructora se monta encima sin cambiar el flujo.</p></div>
+          <div class="tile"><h3>Cumple las bases</h3><p>Código original del equipo, sin assets de terceros, datos de personas ficticios, consentimiento explícito, sin marcas reales.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- P10 Piloto -->
+    <section class="slide" data-notes="Hablar como proveedor: qué necesitamos de la constructora y qué le devolvemos. El premio real es la cena y el piloto.">
+      <p class="eyebrow rise">Del demo al piloto</p>
+      <h2 class="rise">Qué necesitamos de una constructora para arrancar</h2>
+      <div class="cols cols-3 rise" style="margin-top:40px">
+        <div class="tile"><h3>Semana 1</h3><p>Planos y lista de precios del proyecto. Cargamos el edificio, tipologías y orientaciones. Ajustamos programas de bono a la política comercial.</p></div>
+        <div class="tile"><h3>Semana 2</h3><p>Enlace en la caseta y en los anuncios. WhatsApp del equipo conectado. Asesores usando el panel con leads reales.</p></div>
+        <div class="tile hot"><h3>Mes 1 · lo que medimos</h3><p>Visitantes que dejan datos, tiempo entre lead y primera llamada, separaciones por asesor. Comparado contra el brochure de siempre.</p></div>
+      </div>
+      <p class="lead rise" style="margin-top:40px">El sistema no reemplaza al asesor. <span class="amber">Le devuelve las horas</span> que hoy gasta llamando a quien no estaba listo.</p>
+    </section>
+
+    <!-- P11 Equipo -->
+    <section class="slide" data-notes="Completar con los nombres del equipo antes del evento. Roles complementarios: es lo que piden las bases.">
+      <p class="eyebrow rise">Equipo</p>
+      <h2 class="rise">Perfiles complementarios, una sola solución</h2>
+      <div class="cols cols-3 rise" style="margin-top:40px">
+        <div class="tile"><span class="pill">Completar</span><h3 style="margin-top:14px">Nombre · UTEC</h3><p>Desarrollo 3D y experiencia de la familia en el visor.</p></div>
+        <div class="tile"><span class="pill">Completar</span><h3 style="margin-top:14px">Nombre</h3><p>Datos, motor de score, seguimiento e integración con IA.</p></div>
+        <div class="tile"><span class="pill">Completar</span><h3 style="margin-top:14px">Nombre</h3><p>Negocio, relación con constructoras y pitch.</p></div>
+      </div>
+      <p class="lead rise" style="margin-top:40px">Llegamos con un motor genérico. Lo específico del reto que presenten las constructoras se construye en las horas del evento.</p>
+    </section>
+
+    <!-- P12 Cierre -->
+    <section class="slide" data-notes="Repetir la frase. Pausa. Invitar a probarlo en el celular con el enlace. Gracias.">
+      <div class="cover">
+        <div>
+          <p class="eyebrow rise">Cierre</p>
+          <div class="quote rise" style="font-size:52px">El 3D <em>vende</em>. El motor <em>califica</em>. El asesor solo llama <em>a quien está listo</em>.</div>
+          <div class="tag rise" style="margin-top:44px"><span>Pruébalo en tu celular</span><b class="mono" style="color:var(--amber);letter-spacing:0;text-transform:none;font-size:18px">localhost:5173 · reemplazar por el enlace del evento</b></div>
+        </div>
+        <div class="ficha rise" style="text-align:center">
+          <div class="id" style="justify-content:center">GRACIAS</div>
+          <div class="name" style="font-size:34px">Hackathon Innova Vivienda</div>
+          <div class="spec">UTEC Ventures · CTIV Hábitat para la Humanidad<br>10 de septiembre de 2026</div>
+          <div class="btns" style="grid-template-columns:1fr"><span class="p">Preguntas</span></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="zone l" id="zoneL" aria-label="Anterior"></div>
+<div class="zone r" id="zoneR" aria-label="Siguiente"></div>
+<div class="footer">SHOWROOM 3D · INNOVA VIVIENDA 2026</div>
+<div class="nav" aria-label="Navegación por pisos">
+  <div class="counter" id="counter"></div>
+  <svg id="building" width="92" height="150" viewBox="0 0 92 150" role="navigation"></svg>
+</div>
+<div class="notes" id="notes" hidden><div class="t">Notas del presentador</div><div id="notesText"></div></div>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var i = 0;
+  var stage = document.getElementById('stage');
+  var counter = document.getElementById('counter');
+  var notes = document.getElementById('notes');
+  var notesText = document.getElementById('notesText');
+  var svg = document.getElementById('building');
+  var NS = 'http://www.w3.org/2000/svg';
+
+  // Elevación del edificio: un piso por diapositiva, el activo se enciende en ámbar.
+  var floorH = 10, cols = 3, floors = [];
+  var base = document.createElementNS(NS, 'rect');
+  base.setAttribute('x', 18); base.setAttribute('y', 150 - total * floorH - 6);
+  base.setAttribute('width', 56); base.setAttribute('height', total * floorH + 6);
+  base.setAttribute('fill', '#131C2E'); base.setAttribute('stroke', '#26344F');
+  svg.appendChild(base);
+  for (var f = 0; f < total; f++) {
+    var g = document.createElementNS(NS, 'g');
+    g.style.cursor = 'pointer';
+    var y = 150 - (f + 1) * floorH - 3;
+    for (var c = 0; c < cols; c++) {
+      var w = document.createElementNS(NS, 'rect');
+      w.setAttribute('x', 24 + c * 16); w.setAttribute('y', y + 2);
+      w.setAttribute('width', 12); w.setAttribute('height', 6);
+      w.setAttribute('rx', 1);
+      g.appendChild(w);
+    }
+    var hit = document.createElementNS(NS, 'rect');
+    hit.setAttribute('x', 18); hit.setAttribute('y', y); hit.setAttribute('width', 56); hit.setAttribute('height', floorH);
+    hit.setAttribute('fill', 'transparent');
+    g.appendChild(hit);
+    (function (idx) { g.addEventListener('click', function () { go(idx); }); })(f);
+    svg.appendChild(g);
+    floors.push(g);
+  }
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function go(n) {
+    i = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+    floors.forEach(function (g, k) {
+      Array.prototype.forEach.call(g.querySelectorAll('rect'), function (r, ri) {
+        if (ri === cols) return;
+        r.setAttribute('fill', k === i ? '#F5B841' : k < i ? '#34D399' : '#26344F');
+        r.setAttribute('opacity', k === i ? 1 : k < i ? .55 : 1);
+      });
+    });
+    counter.innerHTML = '<b>P' + pad(i + 1) + '</b> / ' + pad(total);
+    notesText.textContent = slides[i].getAttribute('data-notes') || '';
+    try { location.hash = 'p' + (i + 1); } catch (e) {}
+  }
+
+  function fit() {
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.94;
+    stage.style.transform = 'scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(total - 1);
+    else if (e.key === 'f' || e.key === 'F') {
+      var el = document.documentElement;
+      if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen();
+    }
+    else if (e.key === 'n' || e.key === 'N') notes.hidden = !notes.hidden;
+  });
+  document.getElementById('zoneL').addEventListener('click', function () { go(i - 1); });
+  document.getElementById('zoneR').addEventListener('click', function () { go(i + 1); });
+
+  var x0 = null;
+  document.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) go(dx < 0 ? i + 1 : i - 1);
+  });
+
+  var m = /p(\d+)/.exec(location.hash || '');
+  go(m ? parseInt(m[1], 10) - 1 : 0);
+})();
+</script>

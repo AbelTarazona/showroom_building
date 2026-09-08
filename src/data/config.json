@@ -1,0 +1,60 @@
+{
+  "_nota": "Cifras REFERENCIALES para la demo. Parametrizables por proyecto. No son valores oficiales vigentes.",
+  "moneda": "S/",
+  "financiamiento": {
+    "tea_anual": 0.105,
+    "plazos_anios": [10, 15, 20, 25],
+    "plazo_default_anios": 20,
+    "cuota_inicial_min_pct": 0.075,
+    "cuota_inicial_default_pct": 0.10,
+    "ratio_cuota_ingreso_max": 0.35
+  },
+  "programas": [
+    {
+      "id": "techo_propio",
+      "nombre": "Techo Propio (Bono Familiar Habitacional)",
+      "ingreso_familiar_max": 3715,
+      "ahorro_min_pct": 0.03,
+      "precio_vivienda_max": 143000,
+      "requiere_no_tener_vivienda": true,
+      "bono": 44000
+    },
+    {
+      "id": "mivivienda",
+      "nombre": "Nuevo Crédito Mivivienda + Bono del Buen Pagador",
+      "precio_vivienda_min": 68400,
+      "precio_vivienda_max": 464200,
+      "cuota_inicial_min_pct": 0.075,
+      "requiere_no_tener_vivienda": true,
+      "bono_por_tramo": [
+        { "hasta": 100000, "bono": 27400 },
+        { "hasta": 150000, "bono": 23100 },
+        { "hasta": 250000, "bono": 21200 },
+        { "hasta": 464200, "bono": 7100 }
+      ]
+    }
+  ],
+  "score": {
+    "precalificacion_alta": 30,
+    "precalificacion_media": 15,
+    "simulo_y_alcanza": 15,
+    "vio_3_unidades": 5,
+    "vio_interior": 5,
+    "vio_vista": 5,
+    "favorito": 5,
+    "comparo": 5,
+    "revisita": 10,
+    "inicio_separacion": 15,
+    "agendo": 10,
+    "telefono_valido": 5
+  },
+  "seguimientos": {
+    "canal_default": "whatsapp",
+    "secuencia_minutos": [5, 1440, 4320]
+  },
+  "openai": {
+    "modelo": "gpt-5-mini",
+    "modelo_chat": "gpt-5-mini"
+  },
+  "asesor": { "nombre": "Carla Quispe", "telefono": "51900000001" }
+}
