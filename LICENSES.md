@@ -1,6 +1,6 @@
 # Licencias de dependencias y assets
 
-Todo el código de este repositorio es original del equipo. La mecánica de "edificio en corte con lista de niveles"
+Todo el código de este repositorio es original del equipo y se licencia bajo PolyForm Noncommercial 1.0.0 (ver [LICENSE.md](LICENSE.md)). La mecánica de "edificio en corte con lista de niveles"
 está inspirada en visores 3D públicos, pero no se copió código de ninguno.
 
 ## Librerías (npm)

@@ -29,3 +29,14 @@ supabase      config, migración y seed
 ```
 
 Todos los datos de personas son ficticios. Constructora y proyecto son inventados. Cifras de bonos y tasas son referenciales.
+
+## Licencia
+
+Este código se publica bajo la [PolyForm Noncommercial License 1.0.0](LICENSE.md): puedes usarlo, estudiarlo,
+modificarlo y compartirlo **solo con fines no comerciales**. Eso incluye uso personal, investigación, educación,
+hackathons y organizaciones sin fines de lucro. Venderlo o usarlo en un producto o servicio comercial (por ejemplo,
+el showroom de una constructora o inmobiliaria) requiere un permiso aparte: escríbeme por
+[GitHub](https://github.com/AbelTarazona).
+
+Al redistribuirlo, conserva el aviso de copyright que está al inicio de `LICENSE.md`. Las librerías y assets de
+terceros mantienen sus propias licencias (ver [LICENSES.md](LICENSES.md)).
